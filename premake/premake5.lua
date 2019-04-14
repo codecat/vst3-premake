@@ -2,7 +2,7 @@ local DIR_ROOT = (path.getabsolute('..') .. '/')
 local DIR_VST3TEST = DIR_ROOT .. 'Vst3Test/'
 local DIR_VST3_SDK = 'D:/Dev/VST3_SDK/'
 
-solution 'Vst3Test'
+workspace 'Vst3Test'
 	language 'C++'
 	location('Projects/' .. _ACTION)
 
@@ -19,11 +19,7 @@ solution 'Vst3Test'
 
 	-- Flags
 	cppdialect 'C++11'
-	rtti 'Off'
 	symbols 'On' -- Or 'Full'
-
-	-- Vst3 target extension
-	targetextension '.vst3'
 
 	-- Configurations
 	configuration 'Debug'
@@ -37,6 +33,9 @@ solution 'Vst3Test'
 	-- Vst3Test project
 	project 'Vst3Test'
 		kind 'SharedLib'
+
+		-- Vst3 target extension
+		targetextension '.vst3'
 
 		-- Processor files
 		files {
@@ -53,22 +52,24 @@ solution 'Vst3Test'
 
 		-- SDK files
 		files {
-			DIR_VST3_SDK .. 'base/**.cpp',
-			DIR_VST3_SDK .. 'base/**.h',
+			path.join(DIR_VST3_SDK, 'base/**.cpp'),
+			path.join(DIR_VST3_SDK, 'base/**.h'),
 
-			DIR_VST3_SDK .. 'pluginterfaces/**.cpp',
-			DIR_VST3_SDK .. 'pluginterfaces/**.h',
+			path.join(DIR_VST3_SDK, 'pluginterfaces/**.cpp'),
+			path.join(DIR_VST3_SDK, 'pluginterfaces/**.h'),
 
-			DIR_VST3_SDK .. 'public.sdk/source/common/**.cpp',
-			DIR_VST3_SDK .. 'public.sdk/source/common/**.h',
+			path.join(DIR_VST3_SDK, 'public.sdk/source/common/**.cpp'),
+			path.join(DIR_VST3_SDK, 'public.sdk/source/common/**.h'),
 
-			DIR_VST3_SDK .. 'public.sdk/source/vst/*.cpp',
-			DIR_VST3_SDK .. 'public.sdk/source/vst/*.h',
-			DIR_VST3_SDK .. 'public.sdk/source/vst/utility/**.cpp',
-			DIR_VST3_SDK .. 'public.sdk/source/vst/utility/**.h',
+			path.join(DIR_VST3_SDK, 'public.sdk/source/vst/*.cpp'),
+			path.join(DIR_VST3_SDK, 'public.sdk/source/vst/*.h'),
+			path.join(DIR_VST3_SDK, 'public.sdk/source/vst/utility/**.cpp'),
+			path.join(DIR_VST3_SDK, 'public.sdk/source/vst/utility/**.h'),
+			path.join(DIR_VST3_SDK, 'public.sdk/source/vst/hosting/parameterchanges.cpp'),
+			path.join(DIR_VST3_SDK, 'public.sdk/source/vst/hosting/parameterchanges.h'),
 
-			DIR_VST3_SDK .. 'public.sdk/source/main/pluginfactory.cpp',
-			DIR_VST3_SDK .. 'public.sdk/source/main/pluginfactory.h',
+			path.join(DIR_VST3_SDK, 'public.sdk/source/main/pluginfactory.cpp'),
+			path.join(DIR_VST3_SDK, 'public.sdk/source/main/pluginfactory.h'),
 		}
 
 		-- SDK includes
@@ -76,29 +77,23 @@ solution 'Vst3Test'
 			DIR_VST3_SDK,
 		}
 
-		-- These need to be excluded for the VST3 SDK as they're getting included
-		-- from other cpp files. (strange but ok)
 		removefiles {
-			DIR_VST3_SDK .. 'public.sdk/source/vst/vsteditcontroller.cpp',
-			DIR_VST3_SDK .. 'public.sdk/source/vst/basewrapper/basewrapper.sdk.cpp',
+			-- This needs to be excluded as it's getting included from other cpp files (strange but ok)
+			path.join(DIR_VST3_SDK, 'public.sdk/source/vst/vsteditcontroller.cpp'),
+
+			-- We don't need vstgui
+			path.join(DIR_VST3_SDK, 'public.sdk/source/vst/vstgui*'),
 		}
 
 		-- Exclude some things we don't care about for this test
 		removefiles {
-			DIR_VST3_SDK .. 'public.sdk/source/vst/vstgui*',
+			path.join(DIR_VST3_SDK, 'public.sdk/source/vst/vstgui*'),
 		}
 
 		-- Platform-dependant files
-		if os.target() == 'windows' then
-			files {
-				DIR_VST3_SDK .. 'public.sdk/source/main/dllmain.cpp',
-			}
-		elseif os.target() == 'macosx' then
-			files {
-				DIR_VST3_SDK .. 'public.sdk/source/main/macmain.cpp',
-			}
-		elseif os.target() == 'linux' then
-			files {
-				DIR_VST3_SDK .. 'public.sdk/source/main/linuxmain.cpp',
-			}
-		end
+		filter 'system:windows'
+			files { path.join(DIR_VST3_SDK, 'public.sdk/source/main/dllmain.cpp') }
+		filter 'system:macosx'
+			files { path.join(DIR_VST3_SDK, 'public.sdk/source/main/macmain.cpp') }
+		filter 'system:linux'
+			files { path.join(DIR_VST3_SDK, 'public.sdk/source/main/linuxmain.cpp') }
